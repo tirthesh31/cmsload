@@ -1,59 +1,52 @@
 (function () {
   const loadMoreBtn = document.querySelector('[fh-cmsload-element="loadMore"]');
   const realList = document.querySelector('[fh-cmsload-element="list"]');
-  let pageStack = [];       // arrays of appended nodes
-  let anchorStack = [];     // absolute Y positions to scroll back to
+  let pageStack = [];
   let currentPage = 1;
   let loadLessBtn = null;
 
   const updatePageHref = (href, page) =>
     href.replace(/_page=\d+/, `_page=${page}`);
 
+  // Animation for newly added items
   function animateItem(el) {
     el.style.opacity = "0";
     el.style.transform = "translateY(20px)";
     el.style.transition = "opacity .3s ease, transform .3s ease";
-    void el.offsetHeight; // force reflow
+
+    // Force reflow so animation starts correctly
+    void el.offsetHeight;
+
     requestAnimationFrame(() => {
       el.style.opacity = "1";
-      el.style.transform = "translateY(0)";
+      el.style.transform = "translateY(0px)";
     });
   }
 
+  // Load MORE
   async function loadMore() {
-    if (!loadMoreBtn) return;
-
-    // Capture anchor Y (last visible item's Y) BEFORE adding new items
-    const lastVisible = realList.lastElementChild;
-    const anchorY = lastVisible
-      ? lastVisible.getBoundingClientRect().top + window.scrollY
-      : 0;
-    anchorStack.push(anchorY);
-
     loadMoreBtn.href = updatePageHref(loadMoreBtn.href, currentPage + 1);
 
     const html = await fetch(loadMoreBtn.href).then(r => r.text());
     const doc = new DOMParser().parseFromString(html, "text/html");
 
-    const nodeList = doc.querySelector('[fh-cmsload-element="list"]')
-      .querySelectorAll('[role="listitem"]');
-    const newItems = Array.from(nodeList);
+    const newItems = [
+      ...doc.querySelector('[fh-cmsload-element="list"]')
+        .querySelectorAll('[role="listitem"]')
+    ];
 
-    // Append and animate with small stagger
-    newItems.forEach((item, i) => {
+    newItems.forEach(item => {
       realList.appendChild(item);
-      // stagger for nicer UX
-      setTimeout(() => animateItem(item), i * 40);
+      animateItem(item);
     });
 
     pageStack.push(newItems);
     currentPage++;
 
-    // Load Less button logic (grab from fetched page if needed)
+    // Load Less Init & Show
     if (currentPage > 1) {
       if (!loadLessBtn) {
-        loadLessBtn = doc.querySelector('[fh-cmsload-element="loadLess"]')
-          || doc.querySelector('.w-pagination-previous');
+        loadLessBtn = doc.querySelector('[fh-cmsload-element="loadLess"]');
         if (loadLessBtn) {
           loadLessBtn.style.display = "inline-block";
           loadMoreBtn.parentNode.insertBefore(loadLessBtn, loadMoreBtn);
@@ -66,50 +59,38 @@
         loadLessBtn.style.display = "inline-block";
       }
     }
-
-    // Update next button URL from the fetched doc's next button if any
-    const nextBtnFromDoc = doc.querySelector('.w-pagination-next') || doc.querySelector('[fh-cmsload-element="loadMore"]');
-    if (nextBtnFromDoc) loadMoreBtn.href = updatePageHref(nextBtnFromDoc.getAttribute('href') || loadMoreBtn.href, currentPage + 0);
   }
 
-  function clamp(n) {
-    const max = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight) - window.innerHeight;
-    return Math.max(0, Math.min(n, max));
-  }
-
+  // Load LESS
   function loadLess() {
     if (!pageStack.length) return;
 
-    // Remove last batch (with optional animation)
     const lastBatch = pageStack.pop();
-    // Optionally animate removal; here we remove immediately but could fade out
-    lastBatch.forEach(node => node.remove());
+    lastBatch.forEach(item => item.remove());
     currentPage--;
 
-    // Pull the anchor Y for this batch
-    const targetY = anchorStack.pop() || 0;
-
-    // Wait a tick so layout updates, then scroll
+    // SCROLL FIX — scrolls to last visible item
     requestAnimationFrame(() => {
-      // clamp target to the current max scrollable height
-      const y = clamp(targetY);
-      window.scrollTo({ top: y, behavior: 'smooth' });
+      const lastVisible = realList.lastElementChild;
 
-      // If we've returned to page 1, hide loadLess button
-      if (currentPage === 1 && loadLessBtn) {
-        loadLessBtn.style.display = "none";
+      if (lastVisible) {
+        lastVisible.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
       }
-      // ensure loadMore button visible
-      if (loadMoreBtn) loadMoreBtn.style.display = "inline-block";
     });
+
+    // Hide Load Less if on first page
+    if (currentPage === 1 && loadLessBtn)
+      loadLessBtn.style.display = "none";
+
+    loadMoreBtn.style.display = "inline-block";
   }
 
-  if (loadMoreBtn) {
-    loadMoreBtn.addEventListener("click", e => {
-      e.preventDefault();
-      loadMore();
-    });
-  } else {
-    console.warn('loadMoreBtn not found: selector [fh-cmsload-element="loadMore"]');
-  }
+  // Event Listener
+  loadMoreBtn.addEventListener("click", e => {
+    e.preventDefault();
+    loadMore();
+  });
 })();
