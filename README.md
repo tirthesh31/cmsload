@@ -33,9 +33,11 @@ Turn on pagination in Webflow for your Collection List.
 Give your Next button a custom attribute:
 
 Name:
+
     fh-cmsload-element
 
 Value:
+
     loadMore
 
 Load Less Button (Optional)
@@ -43,9 +45,11 @@ Load Less Button (Optional)
 If you want users to scroll back to previous items, give your Previous button a custom attribute:
 
 Name:
+
     fh-cmsload-element
 
 Value:
+
     loadLess
 
 
