@@ -55,15 +55,12 @@ window.Webflow.push(() => {
         if (!loadLessBtn) {
           loadLessBtn = doc.querySelector('[so-cmsload-element="loadLess"]');
           if (loadLessBtn) {
-            loadLessBtn.style.display = "inline-block";
             loadMoreBtn.parentNode.insertBefore(loadLessBtn, loadMoreBtn);
             loadLessBtn.addEventListener("click", e => {
               e.preventDefault();
               loadLess();
             });
           }
-        } else {
-          loadLessBtn.style.display = "inline-block";
         }
       }
     }
@@ -85,11 +82,6 @@ window.Webflow.push(() => {
           });
         }
       });
-
-      if (currentPage === 1 && loadLessBtn)
-        loadLessBtn.style.display = "none";
-
-      loadMoreBtn.style.display = "inline-block";
     }
 
     // Event Listener
