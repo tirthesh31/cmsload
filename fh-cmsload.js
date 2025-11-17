@@ -1,8 +1,8 @@
-
 (function () {
   const loadMoreBtn = document.querySelector('[fh-cmsload-element="loadMore"]');
   const realList = document.querySelector('[fh-cmsload-element="list"]');
   let pageStack = [];
+  let scrollStack = [];
   let currentPage = 1;
   let loadLessBtn = null;
 
@@ -14,10 +14,7 @@
     el.style.opacity = "0";
     el.style.transform = "translateY(20px)";
     el.style.transition = "opacity .3s ease, transform .3s ease";
-
-	// force a synchronous reflow so the browser registers the initial state
-  // reading offsetHeight forces layout
-  void el.offsetHeight;
+    void el.offsetHeight;
     requestAnimationFrame(() => {
       el.style.opacity = "1";
       el.style.transform = "translateY(0px)";
@@ -25,6 +22,9 @@
   }
 
   async function loadMore() {
+    // store scroll position BEFORE adding new items
+    scrollStack.push(window.scrollY);
+
     loadMoreBtn.href = updatePageHref(loadMoreBtn.href, currentPage + 1);
 
     const html = await fetch(loadMoreBtn.href).then(r => r.text());
@@ -37,7 +37,7 @@
 
     newItems.forEach(item => {
       realList.appendChild(item);
-      animateItem(item); // ← ADD ANIMATION HERE
+      animateItem(item);
     });
 
     pageStack.push(newItems);
@@ -62,9 +62,20 @@
   function loadLess() {
     if (!pageStack.length) return;
 
+    // remove last batch
     pageStack.pop().forEach(item => item.remove());
     currentPage--;
 
+    // get stored scroll position
+    const targetScroll = scrollStack.pop() || 0;
+
+    // smooth scroll back up
+    window.scrollTo({
+      top: targetScroll,
+      behavior: "smooth"
+    });
+
+    // hide load less on first page
     if (currentPage === 1 && loadLessBtn)
       loadLessBtn.style.display = "none";
 
