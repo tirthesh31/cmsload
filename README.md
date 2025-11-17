@@ -19,9 +19,11 @@ Include the script in your Webflow project by pasting the following **Inside the
 Add a custom attribute to your Collection List wrapper:
 
 Name: 
+
     fh-cmsload-element
 
-Value: 
+Value:
+ 
     list
 
 ### 2. Pagination Buttons
