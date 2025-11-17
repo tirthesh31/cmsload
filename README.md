@@ -18,29 +18,35 @@ Include the script in your Webflow project by pasting the following **Inside the
 
 Add a custom attribute to your Collection List wrapper:
 
-    Name: fh-cmsload-element
+Name: 
+    fh-cmsload-element
 
-    Value: list
+Value: 
+    list
 
 ### 2. Pagination Buttons
 
 Load More Button
 
-    Turn on pagination in Webflow for your Collection List.
+Turn on pagination in Webflow for your Collection List.
 
-    Give your Next button a custom attribute:
+Give your Next button a custom attribute:
 
-        Name: fh-cmsload-element
+Name:
+    fh-cmsload-element
 
-        Value: loadMore
+Value:
+    loadMore
 
 Load Less Button (Optional)
 
-    If you want users to scroll back to previous items, give your Previous button a custom attribute:
+If you want users to scroll back to previous items, give your Previous button a custom attribute:
 
-        Name: fh-cmsload-element
+Name:
+    fh-cmsload-element
 
-        Value: loadLess
+Value:
+    loadLess
 
 
 The script will dynamically handle showing/hiding the Load Less button as needed.
