@@ -10,13 +10,13 @@ This library is designed to be plug-and-play for Webflow developers. It automati
 
 Include the script in your Webflow project by pasting the following **Inside the body**:
 
-<script src="https://cdn.jsdelivr.net/gh/tirthesh31/cmsload@main/so-cmsload.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/tirthesh31/cmsload@main/so-cmsload.min.js" defer><script>
 
 ## ⚙️ Setup Instructions
 
 ### 1. Collection List Element
 
-Add a custom attribute to your Collection List wrapper:
+Add a custom attribute to your Collection List:
 
 Name: 
 
