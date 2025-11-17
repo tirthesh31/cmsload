@@ -1,96 +1,101 @@
-(function () {
-  const loadMoreBtn = document.querySelector('[so-cmsload-element="loadMore"]');
-  const realList = document.querySelector('[so-cmsload-element="list"]');
-  let pageStack = [];
-  let currentPage = 1;
-  let loadLessBtn = null;
+window.Webflow ||= [];
+window.Webflow.push(() => {
+  // Run ONLY after Webflow fully loads the page
 
-  const updatePageHref = (href, page) =>
-    href.replace(/_page=\d+/, `_page=${page}`);
+  (function () {
+    const loadMoreBtn = document.querySelector('[so-cmsload-element="loadMore"]');
+    const realList = document.querySelector('[so-cmsload-element="list"]');
 
-  // Animation for newly added items
-  function animateItem(el) {
-    el.style.opacity = "0";
-    el.style.transform = "translateY(20px)";
-    el.style.transition = "opacity .3s ease, transform .3s ease";
+    // If elements don't exist, STOP the script (prevents errors)
+    if (!loadMoreBtn || !realList) return;
 
-    // Force reflow so animation starts correctly
-    void el.offsetHeight;
+    let pageStack = [];
+    let currentPage = 1;
+    let loadLessBtn = null;
 
-    requestAnimationFrame(() => {
-      el.style.opacity = "1";
-      el.style.transform = "translateY(0px)";
-    });
-  }
+    const updatePageHref = (href, page) =>
+      href.replace(/_page=\d+/, `_page=${page}`);
 
-  // Load MORE
-  async function loadMore() {
-    loadMoreBtn.href = updatePageHref(loadMoreBtn.href, currentPage + 1);
+    // Animation for newly added items
+    function animateItem(el) {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(20px)";
+      el.style.transition = "opacity .3s ease, transform .3s ease";
 
-    const html = await fetch(loadMoreBtn.href).then(r => r.text());
-    const doc = new DOMParser().parseFromString(html, "text/html");
+      void el.offsetHeight; // Reflow
 
-    const newItems = [
-      ...doc.querySelector('[so-cmsload-element="list"]')
-        .querySelectorAll('[role="listitem"]')
-    ];
+      requestAnimationFrame(() => {
+        el.style.opacity = "1";
+        el.style.transform = "translateY(0px)";
+      });
+    }
 
-    newItems.forEach(item => {
-      realList.appendChild(item);
-      animateItem(item);
-    });
+    // Load MORE
+    async function loadMore() {
+      loadMoreBtn.href = updatePageHref(loadMoreBtn.href, currentPage + 1);
 
-    pageStack.push(newItems);
-    currentPage++;
+      const html = await fetch(loadMoreBtn.href).then(r => r.text());
+      const doc = new DOMParser().parseFromString(html, "text/html");
 
-    // Load Less Init & Show
-    if (currentPage > 1) {
-      if (!loadLessBtn) {
-        loadLessBtn = doc.querySelector('[so-cmsload-element="loadLess"]');
-        if (loadLessBtn) {
+      const newItems = [
+        ...doc.querySelector('[so-cmsload-element="list"]')
+          .querySelectorAll('[role="listitem"]')
+      ];
+
+      newItems.forEach(item => {
+        realList.appendChild(item);
+        animateItem(item);
+      });
+
+      pageStack.push(newItems);
+      currentPage++;
+
+      // Show Load Less
+      if (currentPage > 1) {
+        if (!loadLessBtn) {
+          loadLessBtn = doc.querySelector('[so-cmsload-element="loadLess"]');
+          if (loadLessBtn) {
+            loadLessBtn.style.display = "inline-block";
+            loadMoreBtn.parentNode.insertBefore(loadLessBtn, loadMoreBtn);
+            loadLessBtn.addEventListener("click", e => {
+              e.preventDefault();
+              loadLess();
+            });
+          }
+        } else {
           loadLessBtn.style.display = "inline-block";
-          loadMoreBtn.parentNode.insertBefore(loadLessBtn, loadMoreBtn);
-          loadLessBtn.addEventListener("click", e => {
-            e.preventDefault();
-            loadLess();
-          });
         }
-      } else {
-        loadLessBtn.style.display = "inline-block";
       }
     }
-  }
 
-  // Load LESS
-  function loadLess() {
-    if (!pageStack.length) return;
+    // Load LESS
+    function loadLess() {
+      if (!pageStack.length) return;
 
-    const lastBatch = pageStack.pop();
-    lastBatch.forEach(item => item.remove());
-    currentPage--;
+      const lastBatch = pageStack.pop();
+      lastBatch.forEach(item => item.remove());
+      currentPage--;
 
-    // SCROLL FIX — scrolls to last visible item
-    requestAnimationFrame(() => {
-      const lastVisible = realList.lastElementChild;
+      requestAnimationFrame(() => {
+        const lastVisible = realList.lastElementChild;
+        if (lastVisible) {
+          lastVisible.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        }
+      });
 
-      if (lastVisible) {
-        lastVisible.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-      }
+      if (currentPage === 1 && loadLessBtn)
+        loadLessBtn.style.display = "none";
+
+      loadMoreBtn.style.display = "inline-block";
+    }
+
+    // Event Listener
+    loadMoreBtn.addEventListener("click", e => {
+      e.preventDefault();
+      loadMore();
     });
-
-    // Hide Load Less if on first page
-    if (currentPage === 1 && loadLessBtn)
-      loadLessBtn.style.display = "none";
-
-    loadMoreBtn.style.display = "inline-block";
-  }
-
-  // Event Listener
-  loadMoreBtn.addEventListener("click", e => {
-    e.preventDefault();
-    loadMore();
-  });
-})();
+  })();
+});
