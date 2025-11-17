@@ -10,7 +10,7 @@ This library is designed to be plug-and-play for Webflow developers and agencies
 
 Include the script in your Webflow project by pasting the following **Inside the body**:
 
-<script src="https://cdn.jsdelivr.net/gh/tirthesh31/cmsload@main/fh-cmsload.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/gh/tirthesh31/cmsload@main/so-cmsload.min.js" defer></script>
 
 ## ⚙️ Setup Instructions
 
@@ -20,10 +20,10 @@ Add a custom attribute to your Collection List wrapper:
 
 Name: 
 
-    fh-cmsload-element
+    so-cmsload-element
 
 Value:
- 
+
     list
 
 ### 2. Pagination Buttons
@@ -36,7 +36,7 @@ Give your Next button a custom attribute:
 
 Name:
 
-    fh-cmsload-element
+    so-cmsload-element
 
 Value:
 
@@ -48,7 +48,7 @@ If you want users to scroll back to previous items, give your Previous button a 
 
 Name:
 
-    fh-cmsload-element
+    so-cmsload-element
 
 Value:
 
