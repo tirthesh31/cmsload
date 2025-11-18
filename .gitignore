@@ -1,5 +1,5 @@
 # Ignore original JS
-fh-cmsload.js
+so-cmsload.js
 
 # Keep minified JS public
 # fh-cmsload.min.js → not listed here
